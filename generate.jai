@@ -2,6 +2,42 @@
 
 vulkan_support := false;
 
+LIVE_OUTPUT :: true;
+
+build_sdl3 :: (debug: bool) -> bool {
+    build_type := ifx debug then "Debug" else "Release";
+
+    SDL3_BUILD_PATH := "SDL/build";
+    make_directory_if_it_does_not_exist(SDL3_BUILD_PATH, true);
+    absolute_build_path := get_absolute_path(SDL3_BUILD_PATH);
+    print("SDL3 build path: %\n", absolute_build_path);
+
+    print("Confuguring SDL3 build (% mode)...\n", build_type);
+
+    config_command: [..] string;
+    array_add(*config_command,
+        "cmake",
+        "-DSDL_SHARED=ON",
+        "-DSDL_STATIC=OFF",
+        "-B",
+        absolute_build_path,
+        tprint("-DCMAKE_BUILD_TYPE=%", build_type),
+        "-DSDL_TESTS=OFF",
+    );
+
+    run_or_exit(config_command, working_directory = "SDL");
+    print("Done configuring SDL3.");
+    print("Building SDL3 (% mode)...", build_type);
+
+    build_command: [..] string;
+    array_add(*build_command, "cmake", "--build", absolute_build_path);
+    if OS == .WINDOWS {
+        array_add(*build_command, tprint("--config=%", build_type));
+    }
+    run_or_exit(build_command, working_directory = "SDL");
+    return true;
+}
+
 build :: () {
 
     set_build_options_dc(.{do_output=false});
@@ -9,6 +45,12 @@ build :: () {
     options := get_build_options();
     args := options.compile_time_command_line;
     vulkan_support = array_find(args, "-vulkan");
+    debug := array_find(args, "-debug");
+
+    if !build_sdl3(debug) {
+        compiler_set_workspace_status(.FAILED);
+        return;
+    }
 
     if !generate_bindings() {
         compiler_set_workspace_status(.FAILED);
@@ -54,11 +96,13 @@ EOF
             output_filename = "linux/linux.jai";
 
             FOOTER :: #string EOF
-libsdl3 :: #library,system "libSDL3.so.0";
+libsdl3 :: #library "../SDL/build/libSDL3";
 EOF;
             opts.footer = FOOTER;
             opts.generate_library_declarations = false;
 
+            array_add(*opts.library_search_paths, "SDL/build");
+            array_add(*opts.library_search_paths, "../SDL/build");
             array_add(*opts.libraries, .{filename="libSDL3.so.0"});
 
         } else #if OS == .MACOS {
@@ -172,6 +216,7 @@ sdl3_visitor :: (decl: *Declaration, parent_decl: *Declaration) -> Declaration_V
 #import "Bindings_Generator";
 #import "File";
 #import "String";
+#import "Process";
 
 DECLARATIONS_TO_OMIT :: string.[
     "_m_prefetch",
@@ -206,3 +251,18 @@ DECLARATIONS_TO_OMIT :: string.[
     "WinMain",
     "wWinMain",
 ];
+
+run_or_exit :: (command: [] string, working_directory: string = #filepath) {
+    // Enable this to see the commands being executed.
+    // print("Executing command \"%\" in directory \"%\"\n", join(..command, separator = " "), working_directory);
+
+    result, output_string, error_string := run_command(..command, working_directory = working_directory, capture_and_return_output = true, print_captured_output = LIVE_OUTPUT);
+    defer {
+        free(output_string);
+        free(error_string);
+    }
+    if result.exit_code != 0 {
+        log_error("Could not run command \"%\" in directory \"%\". Exit code: %\nError:\n%", get_quoted_command_string(command), working_directory, result.exit_code, error_string);
+        exit(1);
+    }
+}

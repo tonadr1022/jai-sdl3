@@ -1,115 +1,8 @@
 //
 // This file was auto-generated using the following command:
 //
-// jai generate.jai
+// jai generate.jai - -vulkan
 //
-
-/*
-File=SDL_video.h
-*/
-
-// From https://wiki.libsdl.org/SDL3/SDL_WindowFlags
-SDL_WINDOW_FULLSCREEN           : SDL_WindowFlags : 0x0000000000000001;    /**< window is in fullscreen mode */
-SDL_WINDOW_OPENGL               : SDL_WindowFlags : 0x0000000000000002;    /**< window usable with OpenGL context */
-SDL_WINDOW_OCCLUDED             : SDL_WindowFlags : 0x0000000000000004;    /**< window is occluded */
-SDL_WINDOW_HIDDEN               : SDL_WindowFlags : 0x0000000000000008;    /**< window is neither mapped onto the desktop nor shown in the taskbar/dock/window list; SDL_ShowWindow() is required for it to become visible */
-SDL_WINDOW_BORDERLESS           : SDL_WindowFlags : 0x0000000000000010;    /**< no window decoration */
-SDL_WINDOW_RESIZABLE            : SDL_WindowFlags : 0x0000000000000020;    /**< window can be resized */
-SDL_WINDOW_MINIMIZED            : SDL_WindowFlags : 0x0000000000000040;    /**< window is minimized */
-SDL_WINDOW_MAXIMIZED            : SDL_WindowFlags : 0x0000000000000080;    /**< window is maximized */
-SDL_WINDOW_MOUSE_GRABBED        : SDL_WindowFlags : 0x0000000000000100;    /**< window has grabbed mouse input */
-SDL_WINDOW_INPUT_FOCUS          : SDL_WindowFlags : 0x0000000000000200;    /**< window has input focus */
-SDL_WINDOW_MOUSE_FOCUS          : SDL_WindowFlags : 0x0000000000000400;    /**< window has mouse focus */
-SDL_WINDOW_EXTERNAL             : SDL_WindowFlags : 0x0000000000000800;    /**< window not created by SDL */
-SDL_WINDOW_MODAL                : SDL_WindowFlags : 0x0000000000001000;    /**< window is modal */
-SDL_WINDOW_HIGH_PIXEL_DENSITY   : SDL_WindowFlags : 0x0000000000002000;    /**< window uses high pixel density back buffer if possible */
-SDL_WINDOW_MOUSE_CAPTURE        : SDL_WindowFlags : 0x0000000000004000;    /**< window has mouse captured (unrelated to MOUSE_GRABBED) */
-SDL_WINDOW_MOUSE_RELATIVE_MODE  : SDL_WindowFlags : 0x0000000000008000;    /**< window has relative mode enabled */
-SDL_WINDOW_ALWAYS_ON_TOP        : SDL_WindowFlags : 0x0000000000010000;    /**< window should always be above others */
-SDL_WINDOW_UTILITY              : SDL_WindowFlags : 0x0000000000020000;    /**< window should be treated as a utility window, not showing in the task bar and window list */
-SDL_WINDOW_TOOLTIP              : SDL_WindowFlags : 0x0000000000040000;    /**< window should be treated as a tooltip and does not get mouse or keyboard focus, requires a parent window */
-SDL_WINDOW_POPUP_MENU           : SDL_WindowFlags : 0x0000000000080000;    /**< window should be treated as a popup menu, requires a parent window */
-SDL_WINDOW_KEYBOARD_GRABBED     : SDL_WindowFlags : 0x0000000000100000;    /**< window has grabbed keyboard input */
-SDL_WINDOW_VULKAN               : SDL_WindowFlags : 0x0000000010000000;    /**< window usable for Vulkan surface */
-SDL_WINDOW_METAL                : SDL_WindowFlags : 0x0000000020000000;    /**< window usable for Metal view */
-SDL_WINDOW_TRANSPARENT          : SDL_WindowFlags : 0x0000000040000000;    /**< window with transparent buffer */
-SDL_WINDOW_NOT_FOCUSABLE        : SDL_WindowFlags : 0x0000000080000000;    /**< window should not be focusable */
-
-/**
- * Used to indicate that you don't care what the window position is.
- *
- * If you _really_ don't care, SDL_WINDOWPOS_UNDEFINED is the same, but always
- * uses the primary display instead of specifying one.
- *
- * \param X the SDL_DisplayID of the display to use.
- *
- * \since This macro is available since SDL 3.2.0.
- */
-// Original: #define SDL_WINDOWPOS_UNDEFINED_DISPLAY(X)  (SDL_WINDOWPOS_UNDEFINED_MASK|(X))
-SDL_WINDOWPOS_UNDEFINED_DISPLAY :: inline (display_id: SDL_DisplayID) -> SDL_DisplayID {
-    return SDL_WINDOWPOS_UNDEFINED_MASK | display_id;
-}
-
-/**
- * Used to indicate that you don't care what the window position/display is.
- *
- * This always uses the primary display.
- *
- * \since This macro is available since SDL 3.2.0.
- */
-// #define SDL_WINDOWPOS_UNDEFINED         SDL_WINDOWPOS_UNDEFINED_DISPLAY(0)
-SDL_WINDOWPOS_UNDEFINED :: #bake_arguments SDL_WINDOWPOS_UNDEFINED_DISPLAY(display_id = 0);
-
-/**
- * A macro to test if the window position is marked as "undefined."
- *
- * \param X the window position value.
- *
- * \since This macro is available since SDL 3.2.0.
- */
-// #define SDL_WINDOWPOS_ISUNDEFINED(X)    (((X)&0xFFFF0000) == SDL_WINDOWPOS_UNDEFINED_MASK)
-SDL_WINDOWPOS_ISUNDEFINED :: inline (display_id: SDL_DisplayID) -> bool {
-    return (display_id & 0xFFFF0000) == SDL_WINDOWPOS_UNDEFINED_MASK;
-}
-
-
-/**
- * Used to indicate that the window position should be centered.
- *
- * SDL_WINDOWPOS_CENTERED is the same, but always uses the primary display
- * instead of specifying one.
- *
- * \param X the SDL_DisplayID of the display to use.
- *
- * \since This macro is available since SDL 3.2.0.
- */
-// #define SDL_WINDOWPOS_CENTERED_DISPLAY(X)  (SDL_WINDOWPOS_CENTERED_MASK|(X))
-SDL_WINDOWPOS_CENTERED_DISPLAY :: inline (display_id: SDL_DisplayID) -> SDL_DisplayID {
-    return SDL_WINDOWPOS_CENTERED_MASK | display_id;
-}
-
-/**
- * Used to indicate that the window position should be centered.
- *
- * This always uses the primary display.
- *
- * \since This macro is available since SDL 3.2.0.
- */
-// #define SDL_WINDOWPOS_CENTERED         SDL_WINDOWPOS_CENTERED_DISPLAY(0)
-SDL_WINDOWPOS_CENTERED :: #bake_arguments SDL_WINDOWPOS_CENTERED_DISPLAY(display_id = 0);
-
-/**
- * A macro to test if the window position is marked as "centered."
- *
- * \param X the window position value.
- *
- * \since This macro is available since SDL 3.2.0.
- */
-// #define SDL_WINDOWPOS_ISCENTERED(X)    \
-            // (((X)&0xFFFF0000) == SDL_WINDOWPOS_CENTERED_MASK)
-SDL_WINDOWPOS_ISCENTERED :: inline (pos: u32) -> bool {
-    return (pos & 0xFFFF0000) == SDL_WINDOWPOS_CENTERED_MASK;
-}
 
 
 
@@ -1244,15 +1137,6 @@ SDL_HINT_ASSERT :: "SDL_ASSERT";
 SDL_HINT_PEN_MOUSE_EVENTS :: "SDL_PEN_MOUSE_EVENTS";
 
 SDL_HINT_PEN_TOUCH_EVENTS :: "SDL_PEN_TOUCH_EVENTS";
-
-SDL_INIT_AUDIO :: 0x00000010;
-SDL_INIT_VIDEO :: 0x00000020;
-SDL_INIT_JOYSTICK :: 0x00000200;
-SDL_INIT_HAPTIC :: 0x00001000;
-SDL_INIT_GAMEPAD :: 0x00002000;
-SDL_INIT_EVENTS :: 0x00004000;
-SDL_INIT_SENSOR :: 0x00008000;
-SDL_INIT_CAMERA :: 0x00010000;
 
 SDL_PROP_APP_METADATA_NAME_STRING :: "SDL.app.metadata.name";
 SDL_PROP_APP_METADATA_VERSION_STRING :: "SDL.app.metadata.version";
@@ -15340,20 +15224,6 @@ SDL_DisplayOrientation :: enum u32 {
 SDL_Window :: struct {}
 
 /**
-* The flags on a window.
-*
-* These cover a lot of true/false, or on/off, window state. Some of it is
-* immutable after being set through SDL_CreateWindow(), some of it can be
-* changed on existing windows by the app, and some of it might be altered by
-* the user or system outside of the app's control.
-*
-* \since This datatype is available since SDL 3.2.0.
-*
-* \sa SDL_GetWindowFlags
-*/
-SDL_WindowFlags :: Uint64;
-
-/**
 * Window flash operation.
 *
 * \since This enum is available since SDL 3.2.0.
@@ -23693,7 +23563,7 @@ SDL_EventType :: enum u32 {
 * \since This struct is available since SDL 3.2.0.
 */
 SDL_CommonEvent :: struct {
-    type:      Uint32; /**< Event type, shared with all events, Uint32 to cover user events which are not in the SDL_EventType enumeration */
+    type:      SDL_EventType; /**< Event type, shared with all events, Uint32 to cover user events which are not in the SDL_EventType enumeration */
     reserved:  Uint32;
     timestamp: Uint64; /**< In nanoseconds, populated using SDL_GetTicksNS() */
 }
@@ -24336,7 +24206,7 @@ SDL_QuitEvent :: struct {
 * \since This struct is available since SDL 3.2.0.
 */
 SDL_UserEvent :: struct {
-    type:      Uint32; /**< SDL_EVENT_USER through SDL_EVENT_LAST-1, Uint32 because these are not in the SDL_EventType enumeration */
+    type:      SDL_EventType; /**< SDL_EVENT_USER through SDL_EVENT_LAST-1, Uint32 because these are not in the SDL_EventType enumeration */
     reserved:  Uint32;
     timestamp: Uint64; /**< In nanoseconds, populated using SDL_GetTicksNS() */
     windowID:  SDL_WindowID; /**< The associated window if any */
@@ -24354,7 +24224,7 @@ SDL_UserEvent :: struct {
 * \since This struct is available since SDL 3.2.0.
 */
 SDL_Event :: union {
-    type:            Uint32; /**< Event type, shared with all events, Uint32 to cover user events which are not in the SDL_EventType enumeration */
+    type:            SDL_EventType; /**< Event type, shared with all events, Uint32 to cover user events which are not in the SDL_EventType enumeration */
     common:          SDL_CommonEvent; /**< Common event data */
     display:         SDL_DisplayEvent; /**< Display event data */
     window:          SDL_WindowEvent; /**< Window event data */
@@ -30558,22 +30428,6 @@ SDL_AddHintCallback :: (name: *u8, callback: SDL_HintCallback, userdata: *void) 
 SDL_RemoveHintCallback :: (name: *u8, callback: SDL_HintCallback, userdata: *void) -> void #foreign libsdl3;
 
 /**
-* Initialization flags for SDL_Init and/or SDL_InitSubSystem
-*
-* These are the flags which may be passed to SDL_Init(). You should specify
-* the subsystems which you will be using in your application.
-*
-* \since This datatype is available since SDL 3.2.0.
-*
-* \sa SDL_Init
-* \sa SDL_Quit
-* \sa SDL_InitSubSystem
-* \sa SDL_QuitSubSystem
-* \sa SDL_WasInit
-*/
-SDL_InitFlags :: Uint32;
-
-/**
 * Return values for optional main callbacks.
 *
 * Returning SDL_APP_SUCCESS or SDL_APP_FAILURE from SDL_AppInit,
@@ -36224,8 +36078,293 @@ SDL_GetVersion :: () -> s32 #foreign libsdl3;
 */
 SDL_GetRevision :: () -> *u8 #foreign libsdl3;
 
+/**
+* The prototype for the application's main() function
+*
+* \param argc an ANSI-C style main function's argc.
+* \param argv an ANSI-C style main function's argv.
+* \returns an ANSI-C main return code; generally 0 is considered successful
+*          program completion, and small non-zero values are considered
+*          errors.
+*
+* \since This datatype is available since SDL 3.2.0.
+*/
+SDL_main_func :: #type (argc: s32, argv: **u8) -> s32 #c_call;
+
+/**
+* Circumvent failure of SDL_Init() when not using SDL_main() as an entry
+* point.
+*
+* This function is defined in SDL_main.h, along with the preprocessor rule to
+* redefine main() as SDL_main(). Thus to ensure that your main() function
+* will not be changed it is necessary to define SDL_MAIN_HANDLED before
+* including SDL.h.
+*
+* \since This function is available since SDL 3.2.0.
+*
+* \sa SDL_Init
+*/
+SDL_SetMainReady :: () -> void #foreign libsdl3;
+
+/**
+* Initializes and launches an SDL application, by doing platform-specific
+* initialization before calling your mainFunction and cleanups after it
+* returns, if that is needed for a specific platform, otherwise it just calls
+* mainFunction.
+*
+* You can use this if you want to use your own main() implementation without
+* using SDL_main (like when using SDL_MAIN_HANDLED). When using this, you do
+* *not* need SDL_SetMainReady().
+*
+* \param argc the argc parameter from the application's main() function, or 0
+*             if the platform's main-equivalent has no argc.
+* \param argv the argv parameter from the application's main() function, or
+*             NULL if the platform's main-equivalent has no argv.
+* \param mainFunction your SDL app's C-style main(). NOT the function you're
+*                     calling this from! Its name doesn't matter; it doesn't
+*                     literally have to be `main`.
+* \param reserved should be NULL (reserved for future use, will probably be
+*                 platform-specific then).
+* \returns the return value from mainFunction: 0 on success, otherwise
+*          failure; SDL_GetError() might have more information on the
+*          failure.
+*
+* \threadsafety Generally this is called once, near startup, from the
+*               process's initial thread.
+*
+* \since This function is available since SDL 3.2.0.
+*/
+SDL_RunApp :: (argc: s32, argv: **u8, mainFunction: SDL_main_func, reserved: *void) -> s32 #foreign libsdl3;
+
+/**
+* An entry point for SDL's use in SDL_MAIN_USE_CALLBACKS.
+*
+* Generally, you should not call this function directly. This only exists to
+* hand off work into SDL as soon as possible, where it has a lot more control
+* and functionality available, and make the inline code in SDL_main.h as
+* small as possible.
+*
+* Not all platforms use this, it's actual use is hidden in a magic
+* header-only library, and you should not call this directly unless you
+* _really_ know what you're doing.
+*
+* \param argc standard Unix main argc.
+* \param argv standard Unix main argv.
+* \param appinit the application's SDL_AppInit function.
+* \param appiter the application's SDL_AppIterate function.
+* \param appevent the application's SDL_AppEvent function.
+* \param appquit the application's SDL_AppQuit function.
+* \returns standard Unix main return value.
+*
+* \threadsafety It is not safe to call this anywhere except as the only
+*               function call in SDL_main.
+*
+* \since This function is available since SDL 3.2.0.
+*/
+SDL_EnterAppMainCallbacks :: (argc: s32, argv: **u8, appinit: SDL_AppInit_func, appiter: SDL_AppIterate_func, appevent: SDL_AppEvent_func, appquit: SDL_AppQuit_func) -> s32 #foreign libsdl3;
+
+/**
+* Callback from the application to let the suspend continue.
+*
+* This function is only needed for Xbox GDK support; all other platforms will
+* do nothing and set an "unsupported" error message.
+*
+* \since This function is available since SDL 3.2.0.
+*/
+SDL_GDKSuspendComplete :: () -> void #foreign libsdl3;
+
+/**
+* Dynamically load the Vulkan loader library.
+*
+* This should be called after initializing the video driver, but before
+* creating any Vulkan windows. If no Vulkan loader library is loaded, the
+* default library will be loaded upon creation of the first Vulkan window.
+*
+* SDL keeps a counter of how many times this function has been successfully
+* called, so it is safe to call this function multiple times, so long as it
+* is eventually paired with an equivalent number of calls to
+* SDL_Vulkan_UnloadLibrary. The `path` argument is ignored unless there is no
+* library currently loaded, and and the library isn't actually unloaded until
+* there have been an equivalent number of calls to SDL_Vulkan_UnloadLibrary.
+*
+* It is fairly common for Vulkan applications to link with libvulkan instead
+* of explicitly loading it at run time. This will work with SDL provided the
+* application links to a dynamic library and both it and SDL use the same
+* search path.
+*
+* If you specify a non-NULL `path`, an application should retrieve all of the
+* Vulkan functions it uses from the dynamic library using
+* SDL_Vulkan_GetVkGetInstanceProcAddr unless you can guarantee `path` points
+* to the same vulkan loader library the application linked to.
+*
+* On Apple devices, if `path` is NULL, SDL will attempt to find the
+* `vkGetInstanceProcAddr` address within all the Mach-O images of the current
+* process. This is because it is fairly common for Vulkan applications to
+* link with libvulkan (and historically MoltenVK was provided as a static
+* library). If it is not found, on macOS, SDL will attempt to load
+* `vulkan.framework/vulkan`, `libvulkan.1.dylib`,
+* `MoltenVK.framework/MoltenVK`, and `libMoltenVK.dylib`, in that order. On
+* iOS, SDL will attempt to load `libMoltenVK.dylib`. Applications using a
+* dynamic framework or .dylib must ensure it is included in its application
+* bundle.
+*
+* On non-Apple devices, application linking with a static libvulkan is not
+* supported. Either do not link to the Vulkan loader or link to a dynamic
+* library version.
+*
+* \param path the platform dependent Vulkan loader library name or NULL.
+* \returns true on success or false on failure; call SDL_GetError() for more
+*          information.
+*
+* \threadsafety This function is not thread safe.
+*
+* \since This function is available since SDL 3.2.0.
+*
+* \sa SDL_Vulkan_GetVkGetInstanceProcAddr
+* \sa SDL_Vulkan_UnloadLibrary
+*/
+SDL_Vulkan_LoadLibrary :: (path: *u8) -> bool #foreign libsdl3;
+
+/**
+* Get the address of the `vkGetInstanceProcAddr` function.
+*
+* This should be called after either calling SDL_Vulkan_LoadLibrary() or
+* creating an SDL_Window with the `SDL_WINDOW_VULKAN` flag.
+*
+* The actual type of the returned function pointer is
+* PFN_vkGetInstanceProcAddr, but that isn't available because the Vulkan
+* headers are not included here. You should cast the return value of this
+* function to that type, e.g.
+*
+* `vkGetInstanceProcAddr =
+* (PFN_vkGetInstanceProcAddr)SDL_Vulkan_GetVkGetInstanceProcAddr();`
+*
+* \returns the function pointer for `vkGetInstanceProcAddr` or NULL on
+*          failure; call SDL_GetError() for more information.
+*
+* \since This function is available since SDL 3.2.0.
+*/
+SDL_Vulkan_GetVkGetInstanceProcAddr :: () -> SDL_FunctionPointer #foreign libsdl3;
+
+/**
+* Unload the Vulkan library previously loaded by SDL_Vulkan_LoadLibrary().
+*
+* SDL keeps a counter of how many times this function has been called, so it
+* is safe to call this function multiple times, so long as it is paired with
+* an equivalent number of calls to SDL_Vulkan_LoadLibrary. The library isn't
+* actually unloaded until there have been an equivalent number of calls to
+* SDL_Vulkan_UnloadLibrary.
+*
+* Once the library has actually been unloaded, if any Vulkan instances
+* remain, they will likely crash the program. Clean up any existing Vulkan
+* resources, and destroy appropriate windows, renderers and GPU devices
+* before calling this function.
+*
+* \threadsafety This function is not thread safe.
+*
+* \since This function is available since SDL 3.2.0.
+*
+* \sa SDL_Vulkan_LoadLibrary
+*/
+SDL_Vulkan_UnloadLibrary :: () -> void #foreign libsdl3;
+
+/**
+* Get the Vulkan instance extensions needed for vkCreateInstance.
+*
+* This should be called after either calling SDL_Vulkan_LoadLibrary() or
+* creating an SDL_Window with the `SDL_WINDOW_VULKAN` flag.
+*
+* On return, the variable pointed to by `count` will be set to the number of
+* elements returned, suitable for using with
+* VkInstanceCreateInfo::enabledExtensionCount, and the returned array can be
+* used with VkInstanceCreateInfo::ppEnabledExtensionNames, for calling
+* Vulkan's vkCreateInstance API.
+*
+* You should not free the returned array; it is owned by SDL.
+*
+* \param count a pointer filled in with the number of extensions returned.
+* \returns an array of extension name strings on success, NULL on failure;
+*          call SDL_GetError() for more information.
+*
+* \since This function is available since SDL 3.2.0.
+*
+* \sa SDL_Vulkan_CreateSurface
+*/
+SDL_Vulkan_GetInstanceExtensions :: (count: *Uint32) -> **u8 #foreign libsdl3;
+
+/**
+* Create a Vulkan rendering surface for a window.
+*
+* The `window` must have been created with the `SDL_WINDOW_VULKAN` flag and
+* `instance` must have been created with extensions returned by
+* SDL_Vulkan_GetInstanceExtensions() enabled.
+*
+* If `allocator` is NULL, Vulkan will use the system default allocator. This
+* argument is passed directly to Vulkan and isn't used by SDL itself.
+*
+* \param window the window to which to attach the Vulkan surface.
+* \param instance the Vulkan instance handle.
+* \param allocator a VkAllocationCallbacks struct, which lets the app set the
+*                  allocator that creates the surface. Can be NULL.
+* \param surface a pointer to a VkSurfaceKHR handle to output the newly
+*                created surface.
+* \returns true on success or false on failure; call SDL_GetError() for more
+*          information.
+*
+* \since This function is available since SDL 3.2.0.
+*
+* \sa SDL_Vulkan_GetInstanceExtensions
+* \sa SDL_Vulkan_DestroySurface
+*/
+SDL_Vulkan_CreateSurface :: (window: *SDL_Window, instance: VkInstance, allocator: *VkAllocationCallbacks, surface: *VkSurfaceKHR) -> bool #foreign libsdl3;
+
+/**
+* Destroy the Vulkan rendering surface of a window.
+*
+* This should be called before SDL_DestroyWindow, if SDL_Vulkan_CreateSurface
+* was called after SDL_CreateWindow.
+*
+* The `instance` must have been created with extensions returned by
+* SDL_Vulkan_GetInstanceExtensions() enabled and `surface` must have been
+* created successfully by an SDL_Vulkan_CreateSurface() call.
+*
+* If `allocator` is NULL, Vulkan will use the system default allocator. This
+* argument is passed directly to Vulkan and isn't used by SDL itself.
+*
+* \param instance the Vulkan instance handle.
+* \param surface vkSurfaceKHR handle to destroy.
+* \param allocator a VkAllocationCallbacks struct, which lets the app set the
+*                  allocator that destroys the surface. Can be NULL.
+*
+* \since This function is available since SDL 3.2.0.
+*
+* \sa SDL_Vulkan_GetInstanceExtensions
+* \sa SDL_Vulkan_CreateSurface
+*/
+SDL_Vulkan_DestroySurface :: (instance: VkInstance, surface: VkSurfaceKHR, allocator: *VkAllocationCallbacks) -> void #foreign libsdl3;
+
+/**
+* Query support for presentation via a given physical device and queue
+* family.
+*
+* The `instance` must have been created with extensions returned by
+* SDL_Vulkan_GetInstanceExtensions() enabled.
+*
+* \param instance the Vulkan instance handle.
+* \param physicalDevice a valid Vulkan physical device handle.
+* \param queueFamilyIndex a valid queue family index for the given physical
+*                         device.
+* \returns true if supported, false if unsupported or an error occurred.
+*
+* \since This function is available since SDL 3.2.0.
+*
+* \sa SDL_Vulkan_GetInstanceExtensions
+*/
+SDL_Vulkan_GetPresentationSupport :: (instance: VkInstance, physicalDevice: VkPhysicalDevice, queueFamilyIndex: Uint32) -> bool #foreign libsdl3;
+
 #scope_file
 
 #import "Basic"; // For push_context
 
-libsdl3 :: #library,system "libSDL3.so.0";
+#import "Vulkan";
+libsdl3 :: #library "../SDL/build/libSDL3";
