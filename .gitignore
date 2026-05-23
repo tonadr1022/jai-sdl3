@@ -3,6 +3,7 @@
 *.rdi
 *.exe
 *.dSYM
+*.so
 
 *.DS_Store
 
