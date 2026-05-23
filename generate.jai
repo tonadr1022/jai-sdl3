@@ -25,7 +25,7 @@ build_sdl3 :: (debug: bool) -> bool {
         "-DSDL_TESTS=OFF",
     );
 
-    run_or_exit(config_command, working_directory = "SDL");
+    run_or_exit(config_command, working_directory = get_absolute_path("SDL"));
     print("Done configuring SDL3.");
     print("Building SDL3 (% mode)...", build_type);
 
@@ -34,8 +34,46 @@ build_sdl3 :: (debug: bool) -> bool {
     if OS == .WINDOWS {
         array_add(*build_command, tprint("--config=%", build_type));
     }
-    run_or_exit(build_command, working_directory = "SDL");
+    run_or_exit(build_command, working_directory = get_absolute_path("SDL"));
+
+    #if OS == .LINUX {
+        if !install_sdl3_linux_lib(absolute_build_path) {
+            return false;
+        }
+    }
+
     return true;
+}
+
+install_sdl3_linux_lib :: (build_path: string) -> bool {
+    LINUX_BIN_DIR := "linux/bin";
+    make_directory_if_it_does_not_exist(LINUX_BIN_DIR, true);
+
+    dest := tprint("%/libSDL3.so", LINUX_BIN_DIR);
+    if file_exists(dest) {
+        if !file_delete(dest) {
+            log_error("Failed to delete old \"%\"", dest);
+            return false;
+        }
+    }
+
+    // SDL may emit libSDL3.so or libSDL3.so.0 in the build dir.
+    for candidate: string.[
+        tprint("%/libSDL3.so", build_path),
+        tprint("%/libSDL3.so.0", build_path),
+    ] {
+        if file_exists(candidate) {
+            if !copy_file(candidate, dest) {
+                log_error("Failed to copy \"%\" to \"%\"", candidate, dest);
+                return false;
+            }
+            print("Installed SDL3 library to %\n", get_absolute_path(dest));
+            return true;
+        }
+    }
+
+    log_error("Could not find libSDL3.so or libSDL3.so.0 in \"%\"", build_path);
+    return false;
 }
 
 build :: () {
@@ -96,13 +134,13 @@ EOF
             output_filename = "linux/linux.jai";
 
             FOOTER :: #string EOF
-libsdl3 :: #library "../SDL/build/libSDL3";
+libsdl3 :: #library "bin/libSDL3";
 EOF;
             opts.footer = FOOTER;
             opts.generate_library_declarations = false;
 
-            array_add(*opts.library_search_paths, "SDL/build");
-            array_add(*opts.library_search_paths, "../SDL/build");
+            array_add(*opts.library_search_paths, get_absolute_path("linux/bin"));
+            array_add(*opts.library_search_paths, get_absolute_path("SDL/build"));
             array_add(*opts.libraries, .{filename="libSDL3.so.0"});
 
         } else #if OS == .MACOS {
@@ -206,6 +244,7 @@ sdl3_visitor :: (decl: *Declaration, parent_decl: *Declaration) -> Declaration_V
 #import "Check";
 #import "Bindings_Generator";
 #import "File";
+#import "File_Utilities";
 #import "String";
 #import "Process";
 
@@ -243,7 +282,7 @@ DECLARATIONS_TO_OMIT :: string.[
     "wWinMain",
 ];
 
-run_or_exit :: (command: [] string, working_directory: string = #filepath) {
+run_or_exit :: (command: [] string, working_directory: string) {
     // Enable this to see the commands being executed.
     // print("Executing command \"%\" in directory \"%\"\n", join(..command, separator = " "), working_directory);
 

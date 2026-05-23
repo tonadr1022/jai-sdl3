@@ -1,7 +1,7 @@
 //
 // This file was auto-generated using the following command:
 //
-// jai generate.jai - -vulkan
+// jai generate.jai
 //
 
 
@@ -1287,7 +1287,7 @@ SDL_MAJOR_VERSION :: 3;
 
 SDL_MINOR_VERSION :: 2;
 
-SDL_MICRO_VERSION :: 14;
+SDL_MICRO_VERSION :: 16;
 
 /**
 * A signed 8-bit integer type.
@@ -4445,7 +4445,7 @@ SDL_atanf :: (x: float) -> float #foreign libsdl3;
 *
 * Domain: `-INF <= x <= INF`, `-INF <= y <= INF`
 *
-* Range: `-Pi/2 <= y <= Pi/2`
+* Range: `-Pi <= y <= Pi`
 *
 * This function operates on double-precision floating point values, use
 * SDL_atan2f for single-precision floats.
@@ -4481,7 +4481,7 @@ SDL_atan2 :: (y: float64, x: float64) -> float64 #foreign libsdl3;
 *
 * Domain: `-INF <= x <= INF`, `-INF <= y <= INF`
 *
-* Range: `-Pi/2 <= y <= Pi/2`
+* Range: `-Pi <= y <= Pi`
 *
 * This function operates on single-precision floating point values, use
 * SDL_atan2 for double-precision floats.
@@ -11594,7 +11594,7 @@ SDL_PackedLayout :: enum u32 {
 *   ABGR32, define a platform-independent encoding into bytes in the order
 *   specified. For example, in RGB24 data, each pixel is encoded in 3 bytes
 *   (red, green, blue) in that order, and in ABGR32 data, each pixel is
-*   encoded in 4 bytes alpha, blue, green, red) in that order. Use these
+*   encoded in 4 bytes (alpha, blue, green, red) in that order. Use these
 *   names if the property of a format that is important to you is the order
 *   of the bytes in memory or on disk.
 * - Names with a bit count per component, such as ARGB8888 and XRGB1555, are
@@ -13920,10 +13920,11 @@ SDL_BlitSurfaceUncheckedScaled :: (src: *SDL_Surface, srcrect: *SDL_Rect, dst: *
 *
 * \param src the SDL_Surface structure to be copied from.
 * \param srcrect the SDL_Rect structure representing the rectangle to be
-*                copied, may not be NULL.
+*                copied, or NULL to copy the entire surface.
 * \param dst the SDL_Surface structure that is the blit target.
 * \param dstrect the SDL_Rect structure representing the target rectangle in
-*                the destination surface, may not be NULL.
+*                the destination surface, or NULL to fill the entire
+*                destination surface.
 * \param scaleMode the SDL_ScaleMode to be used.
 * \returns true on success or false on failure; call SDL_GetError() for more
 *          information.
@@ -36173,198 +36174,8 @@ SDL_EnterAppMainCallbacks :: (argc: s32, argv: **u8, appinit: SDL_AppInit_func, 
 */
 SDL_GDKSuspendComplete :: () -> void #foreign libsdl3;
 
-/**
-* Dynamically load the Vulkan loader library.
-*
-* This should be called after initializing the video driver, but before
-* creating any Vulkan windows. If no Vulkan loader library is loaded, the
-* default library will be loaded upon creation of the first Vulkan window.
-*
-* SDL keeps a counter of how many times this function has been successfully
-* called, so it is safe to call this function multiple times, so long as it
-* is eventually paired with an equivalent number of calls to
-* SDL_Vulkan_UnloadLibrary. The `path` argument is ignored unless there is no
-* library currently loaded, and and the library isn't actually unloaded until
-* there have been an equivalent number of calls to SDL_Vulkan_UnloadLibrary.
-*
-* It is fairly common for Vulkan applications to link with libvulkan instead
-* of explicitly loading it at run time. This will work with SDL provided the
-* application links to a dynamic library and both it and SDL use the same
-* search path.
-*
-* If you specify a non-NULL `path`, an application should retrieve all of the
-* Vulkan functions it uses from the dynamic library using
-* SDL_Vulkan_GetVkGetInstanceProcAddr unless you can guarantee `path` points
-* to the same vulkan loader library the application linked to.
-*
-* On Apple devices, if `path` is NULL, SDL will attempt to find the
-* `vkGetInstanceProcAddr` address within all the Mach-O images of the current
-* process. This is because it is fairly common for Vulkan applications to
-* link with libvulkan (and historically MoltenVK was provided as a static
-* library). If it is not found, on macOS, SDL will attempt to load
-* `vulkan.framework/vulkan`, `libvulkan.1.dylib`,
-* `MoltenVK.framework/MoltenVK`, and `libMoltenVK.dylib`, in that order. On
-* iOS, SDL will attempt to load `libMoltenVK.dylib`. Applications using a
-* dynamic framework or .dylib must ensure it is included in its application
-* bundle.
-*
-* On non-Apple devices, application linking with a static libvulkan is not
-* supported. Either do not link to the Vulkan loader or link to a dynamic
-* library version.
-*
-* \param path the platform dependent Vulkan loader library name or NULL.
-* \returns true on success or false on failure; call SDL_GetError() for more
-*          information.
-*
-* \threadsafety This function is not thread safe.
-*
-* \since This function is available since SDL 3.2.0.
-*
-* \sa SDL_Vulkan_GetVkGetInstanceProcAddr
-* \sa SDL_Vulkan_UnloadLibrary
-*/
-SDL_Vulkan_LoadLibrary :: (path: *u8) -> bool #foreign libsdl3;
-
-/**
-* Get the address of the `vkGetInstanceProcAddr` function.
-*
-* This should be called after either calling SDL_Vulkan_LoadLibrary() or
-* creating an SDL_Window with the `SDL_WINDOW_VULKAN` flag.
-*
-* The actual type of the returned function pointer is
-* PFN_vkGetInstanceProcAddr, but that isn't available because the Vulkan
-* headers are not included here. You should cast the return value of this
-* function to that type, e.g.
-*
-* `vkGetInstanceProcAddr =
-* (PFN_vkGetInstanceProcAddr)SDL_Vulkan_GetVkGetInstanceProcAddr();`
-*
-* \returns the function pointer for `vkGetInstanceProcAddr` or NULL on
-*          failure; call SDL_GetError() for more information.
-*
-* \since This function is available since SDL 3.2.0.
-*/
-SDL_Vulkan_GetVkGetInstanceProcAddr :: () -> SDL_FunctionPointer #foreign libsdl3;
-
-/**
-* Unload the Vulkan library previously loaded by SDL_Vulkan_LoadLibrary().
-*
-* SDL keeps a counter of how many times this function has been called, so it
-* is safe to call this function multiple times, so long as it is paired with
-* an equivalent number of calls to SDL_Vulkan_LoadLibrary. The library isn't
-* actually unloaded until there have been an equivalent number of calls to
-* SDL_Vulkan_UnloadLibrary.
-*
-* Once the library has actually been unloaded, if any Vulkan instances
-* remain, they will likely crash the program. Clean up any existing Vulkan
-* resources, and destroy appropriate windows, renderers and GPU devices
-* before calling this function.
-*
-* \threadsafety This function is not thread safe.
-*
-* \since This function is available since SDL 3.2.0.
-*
-* \sa SDL_Vulkan_LoadLibrary
-*/
-SDL_Vulkan_UnloadLibrary :: () -> void #foreign libsdl3;
-
-/**
-* Get the Vulkan instance extensions needed for vkCreateInstance.
-*
-* This should be called after either calling SDL_Vulkan_LoadLibrary() or
-* creating an SDL_Window with the `SDL_WINDOW_VULKAN` flag.
-*
-* On return, the variable pointed to by `count` will be set to the number of
-* elements returned, suitable for using with
-* VkInstanceCreateInfo::enabledExtensionCount, and the returned array can be
-* used with VkInstanceCreateInfo::ppEnabledExtensionNames, for calling
-* Vulkan's vkCreateInstance API.
-*
-* You should not free the returned array; it is owned by SDL.
-*
-* \param count a pointer filled in with the number of extensions returned.
-* \returns an array of extension name strings on success, NULL on failure;
-*          call SDL_GetError() for more information.
-*
-* \since This function is available since SDL 3.2.0.
-*
-* \sa SDL_Vulkan_CreateSurface
-*/
-SDL_Vulkan_GetInstanceExtensions :: (count: *Uint32) -> **u8 #foreign libsdl3;
-
-/**
-* Create a Vulkan rendering surface for a window.
-*
-* The `window` must have been created with the `SDL_WINDOW_VULKAN` flag and
-* `instance` must have been created with extensions returned by
-* SDL_Vulkan_GetInstanceExtensions() enabled.
-*
-* If `allocator` is NULL, Vulkan will use the system default allocator. This
-* argument is passed directly to Vulkan and isn't used by SDL itself.
-*
-* \param window the window to which to attach the Vulkan surface.
-* \param instance the Vulkan instance handle.
-* \param allocator a VkAllocationCallbacks struct, which lets the app set the
-*                  allocator that creates the surface. Can be NULL.
-* \param surface a pointer to a VkSurfaceKHR handle to output the newly
-*                created surface.
-* \returns true on success or false on failure; call SDL_GetError() for more
-*          information.
-*
-* \since This function is available since SDL 3.2.0.
-*
-* \sa SDL_Vulkan_GetInstanceExtensions
-* \sa SDL_Vulkan_DestroySurface
-*/
-SDL_Vulkan_CreateSurface :: (window: *SDL_Window, instance: VkInstance, allocator: *VkAllocationCallbacks, surface: *VkSurfaceKHR) -> bool #foreign libsdl3;
-
-/**
-* Destroy the Vulkan rendering surface of a window.
-*
-* This should be called before SDL_DestroyWindow, if SDL_Vulkan_CreateSurface
-* was called after SDL_CreateWindow.
-*
-* The `instance` must have been created with extensions returned by
-* SDL_Vulkan_GetInstanceExtensions() enabled and `surface` must have been
-* created successfully by an SDL_Vulkan_CreateSurface() call.
-*
-* If `allocator` is NULL, Vulkan will use the system default allocator. This
-* argument is passed directly to Vulkan and isn't used by SDL itself.
-*
-* \param instance the Vulkan instance handle.
-* \param surface vkSurfaceKHR handle to destroy.
-* \param allocator a VkAllocationCallbacks struct, which lets the app set the
-*                  allocator that destroys the surface. Can be NULL.
-*
-* \since This function is available since SDL 3.2.0.
-*
-* \sa SDL_Vulkan_GetInstanceExtensions
-* \sa SDL_Vulkan_CreateSurface
-*/
-SDL_Vulkan_DestroySurface :: (instance: VkInstance, surface: VkSurfaceKHR, allocator: *VkAllocationCallbacks) -> void #foreign libsdl3;
-
-/**
-* Query support for presentation via a given physical device and queue
-* family.
-*
-* The `instance` must have been created with extensions returned by
-* SDL_Vulkan_GetInstanceExtensions() enabled.
-*
-* \param instance the Vulkan instance handle.
-* \param physicalDevice a valid Vulkan physical device handle.
-* \param queueFamilyIndex a valid queue family index for the given physical
-*                         device.
-* \returns true if supported, false if unsupported or an error occurred.
-*
-* \since This function is available since SDL 3.2.0.
-*
-* \sa SDL_Vulkan_GetInstanceExtensions
-*/
-SDL_Vulkan_GetPresentationSupport :: (instance: VkInstance, physicalDevice: VkPhysicalDevice, queueFamilyIndex: Uint32) -> bool #foreign libsdl3;
-
 #scope_file
 
-#import "Basic"; // For push_context
+#import "Basic"; // For print_to_builder
 
-#import "Vulkan";
-libsdl3 :: #library "../SDL/build/libSDL3";
+libsdl3 :: #library "bin/libSDL3";
